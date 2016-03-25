@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>On-Screen keyboard-friendly WPA2 Key Generator</title>
+    <meta charset="utf-8" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+</head>
+<body>
+    <!-- ******************** WPA2 key generator BEGIN ******************** -->
+    <p><label for="times">Max. times to switch keyboard: </label><input id="times" type="number" value="4" size="2" maxlength="2" /></p>
+    <p><label for="length">Length: </label> <select id="length"> <option value="8">8 chars/64 bits (Minimum/lowest security)</option> <option value="20">20 chars/160 bits (Medium security)</option> <option selected="selected" value="63">63 chars/504 bits (Maximum/highest security)</option> </select></p>
+    <p><input id="generate" type="button" value="Generate" /></p>
+    <p><label for="output">WPA2 Key: </label><input id="output" type="text" size="80" /> <input id="copy" type="button" value="Copy" /></p>
+    <script>
+        $(document).ready(function () {
+            (function (global, undefined) {
+                "use strict";
+
+                // Wire-up button.
+                var generate = $("input#generate");
+                generate.click(function () {
+                    try {
+                        var times = $("input#times").val().trim();
+                        try {
+                            times = parseInt(times);
+                        } catch (e) {
+                            alert("Times has to be a numeric value.");
+                            return;
+                        }
+
+                        var length = $("select#length").val();
+                        try {
+                            length = parseInt(length);
+                        } catch (e) {
+                            alert("Length has to be a numeric value.");
+                            return;
+                        }
+
+                        if (times >= 0 && times <= 10) {
+                            // Lower and upper case letters + numbers. Letter O and number 0 are excluded to avoid confusion.
+                            var allowed = new Array(3);
+                            allowed[0] = "abcdefghijklmnpqrstuvwxyz";
+                            allowed[1] = "ABCDEFGHIJKLMNPQRSTUVWXYZ";
+                            allowed[2] = "123456789";
+                            var switchCounter = times;
+
+                            var source = allowed[getrand(0, 2)]; // Set allowed chars.
+                            var key = "";
+
+                            for (var i = 0; i < length; i++) {
+                                if (switchCounter > 0 &&
+                                    (i + 1) % Math.floor(length / times) == 0) {
+                                    // Choose a different source than the current one.
+                                    var current = source;
+                                    while (current == source) {
+                                        source = allowed[getrand(0, 2)]; // Change allowed chars.
+                                    }
+
+                                    switchCounter--;
+                                }
+
+                                // Append char.
+                                key += source[getrand(0, source.length - 1)];
+                            } // for
+
+                            // Show value in text box.
+                            $("input#output").val(key);
+                        }
+                    } catch (e) {
+                        alert(e.message);
+                    }
+                }); // process.onclick
+
+                // Copy button, use input instead of button, otherwise MSDN triggers a postback.
+                $("input#copy").click(function () {
+                    var input = $("input#output").val();
+
+                    if (window.clipboardData) { // IE.
+                        window.clipboardData.setData("Text", input);
+                    } else { // Other browsers.
+                        window.prompt("Press Ctrl+C to copy, Enter to close.", input);
+                    }
+                });
+
+                function getrand(min, max) {
+                    return Math.floor((max - min + 1) * Math.random() + min);
+                }
+            })(this);
+        });
+    </script>
+    <!-- ******************** WPA2 key generator END ******************** -->
+</body>
+</html>
