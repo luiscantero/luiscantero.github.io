@@ -1,14 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>On-Screen keyboard-friendly WPA2 Key Generator</title>
     <meta charset="utf-8" />
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
     <!-- ******************** WPA2 key generator BEGIN ******************** -->
     <p><label for="times">Max. times to switch keyboard: </label><input id="times" type="number" value="4" size="2" maxlength="2" /></p>
-    <p><label for="length">Length: </label> <select id="length"> <option value="8">8 chars/64 bits (Minimum/lowest security)</option> <option value="20">20 chars/160 bits (Medium security)</option> <option selected="selected" value="63">63 chars/504 bits (Maximum/highest security)</option> </select></p>
+    <p><label for="length">Length: </label> <select id="length"> <option value="8">8 chars/64 bits (Lowest security)</option> <option value="20">20 chars/160 bits (Medium security)</option> <option selected="selected" value="63">63 chars/504 bits (Highest security)</option> </select></p>
     <p><input id="generate" type="button" value="Generate" /></p>
     <p><label for="output">WPA2 Key: </label><input id="output" type="text" size="80" /> <input id="copy" type="button" value="Copy" /></p>
     <script>
@@ -20,51 +20,62 @@
                 var generate = $("input#generate");
                 generate.click(function () {
                     try {
-                        var times = $("input#times").val().trim();
+                        var timesToSwitch = $("input#times").val().trim();
                         try {
-                            times = parseInt(times);
+                            timesToSwitch = parseInt(timesToSwitch);
                         } catch (e) {
                             alert("Times has to be a numeric value.");
                             return;
                         }
 
-                        var length = $("select#length").val();
+                        var keyLength = $("select#length").val();
                         try {
-                            length = parseInt(length);
+                            keyLength = parseInt(keyLength);
                         } catch (e) {
                             alert("Length has to be a numeric value.");
                             return;
                         }
 
-                        if (times >= 0 && times <= 10) {
+                        if (timesToSwitch >= 0 && timesToSwitch <= 10) {
                             // Lower and upper case letters + numbers. Letter O and number 0 are excluded to avoid confusion.
-                            var allowed = new Array(3);
-                            allowed[0] = "abcdefghijklmnpqrstuvwxyz";
-                            allowed[1] = "ABCDEFGHIJKLMNPQRSTUVWXYZ";
-                            allowed[2] = "123456789";
-                            var switchCounter = times;
+							// Starts with a consonant. Consonants are followed by a vowel.
+                            var allowed = new Array(5);
+                            allowed[0] = "bcdfghjklmnpqrstvwxyz";
+                            allowed[1] = "aeiu";
+                            allowed[2] = "BCDFGHJKLMNPQRSTVWXYZ";
+                            allowed[3] = "AEIU";
+                            allowed[4] = "123456789";
+                            var switchCounter = timesToSwitch;
 
-                            var source = allowed[getrand(0, 2)]; // Set allowed chars.
-                            var key = "";
+                            var sourceIndex = getrand(0, 1) * 2; // Set allowed chars, start with a consonant.
+                            var generatedKey = "";
 
-                            for (var i = 0; i < length; i++) {
+                            for (var i = 0; generatedKey.length < keyLength; i++) {
                                 if (switchCounter > 0 &&
-                                    (i + 1) % Math.floor(length / times) == 0) {
+                                        (i + 1) % Math.floor(keyLength / timesToSwitch) == 0) {
                                     // Choose a different source than the current one.
-                                    var current = source;
-                                    while (current == source) {
-                                        source = allowed[getrand(0, 2)]; // Change allowed chars.
+                                    var currentIndex = sourceIndex;
+                                    while (currentIndex == sourceIndex) {
+                                        sourceIndex = getrand(0, 2) * 2; // Change allowed chars.
                                     }
 
                                     switchCounter--;
                                 }
 
-                                // Append char.
-                                key += source[getrand(0, source.length - 1)];
+                                // Append consonant.
+								var keySet = allowed[sourceIndex];
+                                generatedKey += keySet[getrand(0, keySet.length - 1)];
+								// Append vowel.
+								var keyLengthComplete = generatedKey.length < keyLength;
+								var generatingLetters = sourceIndex < allowed.length - 1;
+								if (keyLengthComplete && generatingLetters) {
+									keySet = allowed[sourceIndex + 1];
+									generatedKey += keySet[getrand(0, keySet.length - 1)];
+								}
                             } // for
 
                             // Show value in text box.
-                            $("input#output").val(key);
+                            $("input#output").val(generatedKey);
                         }
                     } catch (e) {
                         alert(e.message);
