@@ -51,8 +51,9 @@
                             var generatedKey = "";
 
                             for (var i = 0; generatedKey.length < keyLength; i++) {
+							var shouldSwitchChars = generatedKey.length % Math.ceil(keyLength / timesToSwitch) == 0;
                                 if (switchCounter > 0 &&
-                                        (i + 1) % Math.floor(keyLength / timesToSwitch) == 0) {
+										generatedKey.length > 0 && shouldSwitchChars) {
                                     // Choose a different source than the current one.
                                     var currentIndex = sourceIndex;
                                     while (currentIndex == sourceIndex) {
@@ -68,7 +69,8 @@
 								// Append vowel.
 								var keyLengthComplete = generatedKey.length < keyLength;
 								var generatingLetters = sourceIndex < allowed.length - 1;
-								if (keyLengthComplete && generatingLetters) {
+								shouldSwitchChars = generatedKey.length % Math.ceil(keyLength / timesToSwitch) == 0;
+								if (keyLengthComplete && generatingLetters && !shouldSwitchChars) {
 									keySet = allowed[sourceIndex + 1];
 									generatedKey += keySet[getrand(0, keySet.length - 1)];
 								}
