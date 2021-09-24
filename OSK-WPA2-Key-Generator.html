@@ -40,10 +40,10 @@
                             // Lower and upper case letters + numbers. Letter O and number 0 are excluded to avoid confusion.
 							// Starts with a consonant. Consonants are followed by a vowel.
                             var allowed = new Array(5);
-                            allowed[0] = "bcdfghjklmnpqrstvwxyz";
+                            allowed[0] = "bcdfghjkmnpqrstvwxyz";
                             allowed[1] = "aeiu";
                             allowed[2] = "BCDFGHJKLMNPQRSTVWXYZ";
-                            allowed[3] = "AEIU";
+                            allowed[3] = "AEU";
                             allowed[4] = "123456789";
                             var switchCounter = timesToSwitch;
 
@@ -51,7 +51,8 @@
                             var generatedKey = "";
 
                             for (var i = 0; generatedKey.length < keyLength; i++) {
-							var shouldSwitchChars = generatedKey.length % Math.ceil(keyLength / timesToSwitch) == 0;
+								var charsPerSwitch = Math.ceil(keyLength / timesToSwitch);
+								var shouldSwitchChars = generatedKey.length % charsPerSwitch == 0;
                                 if (switchCounter > 0 &&
 										generatedKey.length > 0 && shouldSwitchChars) {
                                     // Choose a different source than the current one.
@@ -66,10 +67,11 @@
                                 // Append consonant.
 								var keySet = allowed[sourceIndex];
                                 generatedKey += keySet[getrand(0, keySet.length - 1)];
+
 								// Append vowel.
 								var keyLengthComplete = generatedKey.length < keyLength;
 								var generatingLetters = sourceIndex < allowed.length - 1;
-								shouldSwitchChars = generatedKey.length % Math.ceil(keyLength / timesToSwitch) == 0;
+								shouldSwitchChars = generatedKey.length % charsPerSwitch == 0;
 								if (keyLengthComplete && generatingLetters && !shouldSwitchChars) {
 									keySet = allowed[sourceIndex + 1];
 									generatedKey += keySet[getrand(0, keySet.length - 1)];
